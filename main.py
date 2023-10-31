@@ -19,22 +19,18 @@ def convert(amount, from_ticker, to_ticker, currencies):
     return round(amount * coefficient, 2)
 
 
-def input_currency(input_message, currencies):
-    ticker = input(f"{input_message}: ").strip()
+def input_currency(input_message, currencies, prev_ticker=None):
+    while True:
+        ticker = input(f"{input_message}: ").strip()
+        selected_currency = currencies.get(ticker, None)
 
-    currency = currencies.get(ticker, None)
-    if currency is None:
-        print(f'Ошибка при поиске валюты: {ticker}')
-        exit()
+        if selected_currency is None:
+            print(f'Валюты {ticker} не существует, выберите валюту из представленных выше')
+        elif prev_ticker is not None and prev_ticker == ticker:
+            print(f'Выберите валюту отличную от исходной')
+        else:
+            return ticker
 
-    return ticker
-
-
-current_currencies = {
-    'RUB': 97.4545572753,
-    'EUR': 0.9487101161,
-    'USD': 1,
-}
 
 print("Привет, это программа Конвертер Валют!")
 
@@ -47,15 +43,16 @@ print("""
 Доступные валюты:
 """)
 
-for currency in current_currencies:
+for currency in online_response['data']:
     print(f'- {currency}')
 
-from_ticker = input_currency("Введите исходную валюту", current_currencies)
-to_ticker = input_currency("Введите в какую валюту следует перевести", current_currencies)
+
+from_ticker = input_currency("Введите исходную валюту", online_response['data'])
+to_ticker = input_currency("Введите в какую валюту следует перевести", online_response['data'], from_ticker)
 
 amount_input = input("Введите количество валюты: ")
-amount = int(amount_input)
+amount = float(amount_input)
 
-result = convert(amount, from_ticker, to_ticker, current_currencies)
+result = convert(amount, from_ticker, to_ticker, online_response['data'])
 
 print(f'Результат: {amount} {from_ticker} = {result} {to_ticker}')
